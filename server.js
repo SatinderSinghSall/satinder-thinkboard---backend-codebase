@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000;
 //! Middleware:
 app.use(
   cors({
-    origin: "https://satinder-thinkboard-backend-codebase.onrender.com",
+    origin: "https://satinder-think-board.vercel.app",
   })
 );
 app.use(express.json());
