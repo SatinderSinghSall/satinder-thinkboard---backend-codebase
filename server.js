@@ -14,7 +14,10 @@ const port = process.env.PORT || 5000;
 //! Middleware:
 app.use(
   cors({
-    origin: "https://satinder-think-board.vercel.app",
+    origin: [
+      "https://satinder-think-board.vercel.app",
+      "http://localhost:5173",
+    ],
   })
 );
 app.use(express.json());
