@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
+import userRoutes from "./routes/userRoutes.js";
 import notesRoutes from "./routes/notesRoutes.js";
 import { connectDB } from "./config/db.js";
 import ratelimiter from "./middleware/rateLimiter.js";
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(ratelimiter);
 
 //! Notes Routes:
+app.use("/api/users", userRoutes);
 app.use("/api/notes", notesRoutes);
 
 //! Connect to MongoDB Database & Start the App:
