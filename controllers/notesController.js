@@ -37,8 +37,8 @@ export const getNoteById = async (req, res) => {
 //! Function to create a new Note:
 export const createNote = async (req, res) => {
   try {
-    const { title, content } = req.body;
-    const note = new Note({ title: title, content: content });
+    const { title, content, noteBy } = req.body;
+    const note = new Note({ title: title, content: content, noteBy: noteBy });
     await note.save();
     res.status(201).json({ message: "Post Created Successfully!", note });
   } catch (error) {
@@ -52,12 +52,13 @@ export const createNote = async (req, res) => {
 //! Function to update the Note:
 export const updateNote = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, noteBy } = req.body;
     const updatedNote = await Note.findByIdAndUpdate(
       req.params.id,
       {
         title,
         content,
+        noteBy,
       },
       { new: true }
     );
