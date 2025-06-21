@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-//! Schema of the Database:
 const noteSchema = new mongoose.Schema(
   {
     title: {
@@ -12,13 +11,13 @@ const noteSchema = new mongoose.Schema(
       required: true,
     },
     noteBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
   { timestamps: true }
 );
 
-//! Model of Schema:
 const Note = mongoose.model("Note", noteSchema);
 export default Note;

@@ -1,92 +1,121 @@
+import mongoose from "mongoose";
 import Note from "../models/Note.js";
 
-//! Function to get all Notes from the Database:
+//! Get all notes
 export const getAllNotes = async (req, res) => {
   try {
-    const notes = await Note.find().sort({ createdAt: -1 });
+    const notes = await Note.find()
+      .populate("noteBy", "name email") // Optional: populate user info
+      .sort({ createdAt: -1 });
     res.status(200).json(notes);
   } catch (error) {
-    console.error(`❌ Error while fetching data from database: ${error}`);
+    console.error(`❌ Error while fetching notes: ${error}`);
     res.status(500).json({
-      message:
-        "❌ Internal Server Error: Error while fetching data from database.",
+      message: "❌ Internal Server Error: Could not fetch notes.",
     });
   }
 };
 
-//! Function to get a specific Note:
+//! Get a specific note by ID
 export const getNoteById = async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id);
-    // FIXME : Getting ISE instead of 404 NF
-    if (!note) {
-      return res
-        .status(404)
-        .json({ message: "Invalid: Note id, note not found." });
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Note ID format." });
     }
-    res.status(200).json({ message: "Found Note Successfully!", note });
+
+    const note = await Note.findById(id).populate("noteBy", "name email");
+
+    if (!note) {
+      return res.status(404).json({ message: "Note not found." });
+    }
+
+    res.status(200).json({ message: "Note retrieved successfully!", note });
   } catch (error) {
-    console.error(`❌ Error while fetching the note from database: ${error}`);
+    console.error(`❌ Error while fetching the note: ${error}`);
     res.status(500).json({
-      message:
-        "❌ Internal Server Error: Error while fetching the note from database.",
+      message: "❌ Internal Server Error: Could not fetch the note.",
     });
   }
 };
 
-//! Function to create a new Note:
+//! Create a new note
 export const createNote = async (req, res) => {
   try {
-    const { title, content, noteBy } = req.body;
-    const note = new Note({ title: title, content: content, noteBy: noteBy });
+    const { title, content } = req.body;
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: No user found." });
+    }
+
+    const note = new Note({
+      title,
+      content,
+      noteBy: req.user._id,
+    });
+
     await note.save();
-    res.status(201).json({ message: "Post Created Successfully!", note });
+    res.status(201).json({ message: "Note created successfully!", note });
   } catch (error) {
-    console.error(`❌ Error while creating a note: ${error}`);
+    console.error(`❌ Error while creating note: ${error}`);
     res.status(500).json({
-      message: "❌ Internal Server Error: Error while creating a note.",
+      message: "❌ Internal Server Error: Could not create note.",
     });
   }
 };
 
-//! Function to update the Note:
+//! Update an existing note
 export const updateNote = async (req, res) => {
   try {
-    const { title, content, noteBy } = req.body;
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Note ID format." });
+    }
+
     const updatedNote = await Note.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        content,
-        noteBy,
-      },
+      id,
+      { title, content },
       { new: true }
     );
-    // FIXME : Getting ISE instead of 404 NF
+
     if (!updatedNote) {
-      return res.status(404).json({ message: "Invalid: Note not found." });
+      return res.status(404).json({ message: "Note not found." });
     }
-    res.status(200).json({ message: "Post Updated Successfully!", updateNote });
+
+    res
+      .status(200)
+      .json({ message: "Note updated successfully!", updatedNote });
   } catch (error) {
-    console.error(`❌ Error while updating a note: ${error}`);
+    console.error(`❌ Error while updating note: ${error}`);
     res.status(500).json({
-      message: "❌ Internal Server Error: Error while updating a note.",
+      message: "❌ Internal Server Error: Could not update note.",
     });
   }
 };
 
-//! Function to delete a Note:
+//! Delete a note
 export const deleteNote = async (req, res) => {
   try {
-    const deleteNote = await Note.findByIdAndDelete(req.params.id);
-    if (!deleteNote) {
-      return res.status(404).json({ message: "Invalid: Note not found." });
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Note ID format." });
     }
-    res.status(200).json({ message: "Post Deleted Successfully!" });
+
+    const deletedNote = await Note.findByIdAndDelete(id);
+
+    if (!deletedNote) {
+      return res.status(404).json({ message: "Note not found." });
+    }
+
+    res.status(200).json({ message: "Note deleted successfully!" });
   } catch (error) {
-    console.error(`❌ Error while deleting a note: ${error}`);
+    console.error(`❌ Error while deleting note: ${error}`);
     res.status(500).json({
-      message: "❌ Internal Server Error: Error while deleting a note.",
+      message: "❌ Internal Server Error: Could not delete note.",
     });
   }
 };

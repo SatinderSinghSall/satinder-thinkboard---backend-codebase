@@ -6,22 +6,23 @@ import {
   updateNote,
   deleteNote,
 } from "../controllers/notesController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-//! Route to view all the Notes:
-router.get("/", getAllNotes);
+//! Route to view all Notes (optional: make this protected)
+router.get("/", protect, getAllNotes);
 
-//! Route to view a specific Note:
-router.get("/:id", getNoteById);
+//! Route to view a specific Note
+router.get("/:id", protect, getNoteById);
 
-//! Route to create a Note:
-router.post("/", createNote);
+//! Route to create a Note (protected)
+router.post("/", protect, createNote);
 
-//! Route to update a Note:
-router.put("/:id", updateNote);
+//! Route to update a Note (protected)
+router.put("/:id", protect, updateNote);
 
-//! Route to delete a Note:
-router.delete("/:id", deleteNote);
+//! Route to delete a Note (protected)
+router.delete("/:id", protect, deleteNote);
 
 export default router;
