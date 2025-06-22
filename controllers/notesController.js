@@ -4,9 +4,14 @@ import Note from "../models/Note.js";
 //! Get all notes
 export const getAllNotes = async (req, res) => {
   try {
-    const notes = await Note.find()
-      .populate("noteBy", "name email") // Optional: populate user info
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: No user found." });
+    }
+
+    const notes = await Note.find({ noteBy: req.user._id })
+      .populate("noteBy", "name email")
       .sort({ createdAt: -1 });
+
     res.status(200).json(notes);
   } catch (error) {
     console.error(`❌ Error while fetching notes: ${error}`);
